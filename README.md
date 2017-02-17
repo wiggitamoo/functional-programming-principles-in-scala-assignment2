@@ -52,7 +52,6 @@ In this part, we are interested in functions used to make requests on elements o
 
 
 ```
-1
 def forall(s: Set, p: Int => Boolean): Boolean
 ```
 
