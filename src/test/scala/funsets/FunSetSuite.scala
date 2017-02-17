@@ -77,6 +77,8 @@ class FunSetSuite extends FunSuite {
     val s1 = singletonSet(1)
     val s2 = singletonSet(2)
     val s3 = singletonSet(3)
+    val s1000 = singletonSet(1000)
+    val sneg1000 = singletonSet(-1000)
   }
 
   /**
@@ -97,10 +99,37 @@ class FunSetSuite extends FunSuite {
        * The string argument of "assert" is a message that is printed in case
        * the test fails. This helps identifying which assertion failed.
        */
-      assert(contains(s1, 1), "Singleton")
+      assert(contains(s1, 1), "Singleton 1")
     }
   }
 
+  // Singleton Tests
+
+  test("singletonSet(2) contains 2") {
+    new TestSets {
+      assert(contains(s2, 2), "Singleton 2")
+    }
+  }
+
+  test("singletonSet(3) contains 3") {
+    new TestSets {
+      assert(contains(s3, 3), "Singleton 3")
+    }
+  }
+
+  test("singletonSet(1) does not contains 2") {
+    new TestSets {
+      assert(!contains(s1, 2), "Not Singleton 2")
+    }
+  }
+
+  test("singletonSet(1) does not contains 3") {
+    new TestSets {
+      assert(!contains(s1, 3), "Not Singleton 3")
+    }
+  }
+
+  // Union
   test("union contains all elements of each set") {
     new TestSets {
       val s = union(s1, s2)
@@ -110,5 +139,100 @@ class FunSetSuite extends FunSuite {
     }
   }
 
+  // intersect tests
+  test("intersect contains same elements from each set") {
+    new TestSets {
+      val s = intersect(s1, s2)
+      assert(!contains(s, 1), "Intersect 1")
+      assert(!contains(s, 2), "Intersect 2")
+      assert(!contains(s, 3), "Intersect 3")
+    }
+  }
+
+  // diff tests
+  test("diff elements from each set") {
+    new TestSets {
+      val s = diff(s1, s2)
+      assert(contains(s, 1), "Diff 1")
+      assert(!contains(s, 2), "Diff 2")
+      assert(!contains(s, 3), "Diff 3")
+    }
+  }
+
+  // filter tests
+  test("filter elements accepted by p equal to value") {
+    new TestSets {
+      val s = filter(s1, x => x==1)
+      assert(contains(s, 1), "Filter 1")
+      assert(!contains(s, 2), "Filter 2")
+    }
+  }
+
+  test("filter elements accepted by p equal to range of values") {
+    new TestSets {
+      val s = filter(s2, x => x>=2)
+      assert(!contains(s, 1), "Filter range 1")
+      assert(contains(s, 2), "Filter range 2")
+      assert(!contains(s, 3), "Filter range 3")
+    }
+  }
+
+  // forall tests
+  test("check that forall returns positive results") {
+    new TestSets {
+      assert(forall(s1000, x => x > 0))
+      assert(forall(s1, x => x > 0))
+      assert(forall(s2, x => x > 0))
+      assert(forall(s3, x => x > 0))
+      assert(!forall(sneg1000, x => x > 0))
+    }
+  }
+  test("check that forall returns lower limit for neg results") {
+    new TestSets {
+      assert(!forall(s1, x => x < 0))
+      assert(forall(sneg1000, x => x < 0))
+    }
+  }
+  test("check that forall works with union") {
+    new TestSets {
+      val s = union(s1, s2)
+      assert(forall(s, x => x < 3))
+      assert(!forall(s, x => x > 1))
+    }
+  }
+
+  // test exists
+  test("exists finds 1 in a singletonSet") {
+    new TestSets {
+      assert(exists(s1, x => x==1))
+      assert(!exists(s1, x => x==2))
+    }
+  }
+  test("exists finds integers in set including limits") {
+    new TestSets {
+      val s = union(sneg1000, s1000)
+      assert(exists(s, x => x >= 0))
+      assert(exists(s, x => x < 0))
+    }
+  }
+
+  // test map
+  test("map adding 1 to each integer") {
+    new TestSets {
+      assert(contains(map(s1, (x: Int) => x + 1), 2))
+      assert(contains(map(s2, (x: Int) => x + 1), 3))
+      assert(contains(map(s3, (x: Int) => x + 1), 4))
+      assert(contains(map(sneg1000, (x: Int) => x + 1), -999))
+      assert(contains(map(s1000, (x: Int) => x + 1), 1001))
+      assert(!contains(map(s1, (x: Int) => x + 1), 1))
+    }
+  }
+  test("map multiple sets multiply by 2") {
+    new TestSets {
+      val s = union(sneg1000, s1000)
+      assert(contains(map(s, (x: Int) => x * 2), 2000))
+      assert(contains(map(s, (x: Int) => x * 2), -2000))
+    }
+  }
 
 }
